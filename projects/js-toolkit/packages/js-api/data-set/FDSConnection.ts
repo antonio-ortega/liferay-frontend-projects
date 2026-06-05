@@ -4,8 +4,8 @@
  */
 
 import {getFDSAtom, getOrCreateSelector} from './_internal';
-import Atom = Liferay.State.Atom;
 import {FDSState} from './index';
+import Atom = Liferay.State.Atom;
 
 const DEFAULT_TIMEOUT = 10000;
 
@@ -41,10 +41,10 @@ export class FDSConnection {
 	private static instanceCount = 0;
 
 	private atom: Atom<FDSState>;
-	private disconnected: boolean = false;
+	private disconnected = false;
 	private fdsName: string;
 	private instanceId: number = ++FDSConnection.instanceCount;
-	private isReady: boolean = false;
+	private isReady = false;
 	private navigationHandle: {detach: () => void};
 	private onFDSConnectionInfoChange: (
 		fdsConnectionInfo: FDSConnectionInfo
@@ -125,7 +125,7 @@ export class FDSConnection {
 		return Liferay.State.read(this.selectors.search);
 	};
 
-	setSearch = (query: string) => {
+	setSearch = (query: string): void => {
 		if (!this.isReady) {
 			return;
 		}
@@ -138,7 +138,7 @@ export class FDSConnection {
 		});
 	};
 
-	disconnect = () => {
+	disconnect = (): void => {
 		if (this.disconnected) {
 			return;
 		}
@@ -149,11 +149,11 @@ export class FDSConnection {
 		this.notifyStatus('disconnected');
 	};
 
-	private warn(msg: string) {
+	private warn(msg: string): void {
 		console.warn('[FDSConnection', this.instanceId, ']', msg);
 	}
 
-	private notifyStatus(status: FDSConnectionStatus) {
+	private notifyStatus(status: FDSConnectionStatus): void {
 		this.onFDSConnectionInfoChange({
 			fdsName: this.fdsName,
 			instanceId: this.instanceId,
