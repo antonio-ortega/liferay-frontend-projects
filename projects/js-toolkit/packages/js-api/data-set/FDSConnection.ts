@@ -7,8 +7,14 @@ import {getFDSAtom, getOrCreateSelector} from './_internal';
 import Atom = Liferay.State.Atom;
 import {FDSState} from './index';
 
+const DEFAULT_TIMEOUT = 10000;
+
 export interface FDSStateChangeCallback {
 	search: (query: string) => void;
+}
+
+export interface FDSConnectionOptions {
+	timeout?: number;
 }
 
 export interface FDSConnectionInfo {
@@ -48,16 +54,17 @@ export class FDSConnection {
 
 	constructor(
 		fdsName: string,
-		fdsStateChangeCallbacks: FDSStateChangeCallback,
+		fdsStateChangeCallback: FDSStateChangeCallback,
 		onFDSConnectionInfoChange: (
 			fdsConnectionInfo: FDSConnectionInfo
-		) => void
+		) => void,
+		options: FDSConnectionOptions = {}
 	) {
 		this.fdsName = fdsName;
 		this.onFDSConnectionInfoChange = onFDSConnectionInfoChange;
 		this.notifyStatus('connecting');
 
-		getFDSAtom(fdsName, {timeout: 10000})
+		getFDSAtom(fdsName, {timeout: options.timeout ?? DEFAULT_TIMEOUT})
 			.then((atom: Atom<FDSState>) => {
 				if (this.disconnected) {
 					return;
@@ -79,13 +86,13 @@ export class FDSConnection {
 				this.subscriptions = {
 					search: Liferay.State.subscribe(
 						this.selectors.search,
-						fdsStateChangeCallbacks.search
+						fdsStateChangeCallback.search
 					),
 				};
 
 				// initialize consumer's state
 
-				fdsStateChangeCallbacks.search(this.getSearch());
+				fdsStateChangeCallback.search(this.getSearch() || '');
 
 				// then inform consumer everything is settled
 
