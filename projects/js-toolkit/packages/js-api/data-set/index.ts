@@ -3,6 +3,34 @@
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
 
+/**
+ * Public extension API for the Frontend Data Set (FDS) widget.
+ *
+ * Consumers interact with FDS state through opinionated subscription
+ * helpers — one per blessed slice (`subscribeSearch`,
+ * `subscribeFilters`). New slices are added by exposing a new helper
+ * from this module; consumers do not reach for the underlying atom or
+ * selector directly.
+ *
+ * The remaining interfaces are the contracts that custom cell renderers
+ * and filters implement to integrate with FDS: HTML element builders
+ * for rendering, OData query builders for server-side filtering, and
+ * description builders for human-readable filter summaries.
+ */
+
+// Frontend data set connection and remote state management
+
+export interface FDSState {
+	search: {query: string};
+}
+
+export type {
+	FDSConnectionInfo,
+	FDSConnectionStatus,
+	FDSStateChangeCallback,
+} from './FDSConnection';
+export {FDSConnection} from './FDSConnection';
+
 // Frontend data set cell renderer
 
 export interface FDSTableCellHTMLElementBuilderArgs {
