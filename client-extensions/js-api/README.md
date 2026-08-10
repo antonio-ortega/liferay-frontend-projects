@@ -22,9 +22,11 @@ point, covering three groups:
 
 -   **FDS connection and remote state** (`./connection`) — `FDSConnection` (and
     its companion `FDSConnectionConstructor`) let a Client Extension read and
-    write FDS search state, while `FDSConnectionInfo`, `FDSConnectionStatus`,
-    `FDSConnectionOptions`, and `FDSStateChangeCallback` describe how a
-    connection is opened and observed.
+    write FDS search and filter state, while `FDSConnectionInfo`,
+    `FDSConnectionStatus`, `FDSConnectionOptions`, and `FDSStateChangeCallback`
+    describe how a connection is opened and observed. `FDSFilterState` and the
+    `FDSFilterSelectedDataByType` map describe the filters a data set declares
+    and the selection payload each filter type expects.
 -   **Custom cell renderers** (`./cell-renderer`) — `FDSTableCellHTMLElementBuilder`
     and its args, the HTML element builder a renderer implements to draw a table
     cell.
@@ -60,6 +62,9 @@ import {FDSConnection} from '@liferay/js-api/data-set/connection';
 const connection = new FDSConnection(
 	fdsName,
 	{
+		filters: (filters) => {
+			/* ... */
+		},
 		search: (query) => {
 			/* ... */
 		},
@@ -70,6 +75,46 @@ const connection = new FDSConnection(
 	{timeout: 5000}
 );
 ```
+
+Both state callbacks are optional, and each is invoked once with the current
+value as soon as the connection reports `ready`.
+
+#### Filters
+
+A Client Extension cannot create filters: the data set declares them, and the
+connection only drives the selection of the ones it declares. Build the UI from
+`getFilters()` — the ids it returns are the only ones that can be written back.
+
+```ts
+const filters = connection.getFilters() ?? [];
+
+// [{active: false, id: 'status', label: 'Status', multiple: true,
+//   selectedItemsLabel: '', type: 'selection'}, ...]
+
+const result = connection.setFilter('status', {
+	exclude: false,
+	selectedItems: [{label: 'Approved', value: 'approved'}],
+});
+
+if (!result.accepted) {
+	// 'unknown-filter' | 'invalid-selected-data' | 'not-ready'
+
+	console.warn(result.reason, result.rejectedFilterIds);
+}
+```
+
+Writes never throw. A selection naming a filter the data set does not declare,
+or carrying a payload that does not match the filter's `type`, is skipped and
+reported through the returned `FDSFilterWriteResult`; in a batch, the entries
+that are valid are still applied. Use `setFilters()` for a batch so the data set
+is refetched once instead of once per filter, and `clearFilter()` /
+`clearFilters()` to deactivate.
+
+The shape of `selectedData` depends on the filter's `type`, described by
+`FDSFilterSelectedDataByType`: `selection` filters take
+`{exclude?, selectedItems}`, `dateRange` and `dateTimeRange` filters take
+`{from, to}` date parts, and the payload of a `clientExtension` filter is
+whatever the Client Extension that contributed it defines.
 
 ### `@liferay/js-api/editor`
 

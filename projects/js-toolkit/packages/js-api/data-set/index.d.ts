@@ -2,7 +2,6 @@
  * SPDX-FileCopyrightText: © 2020 Liferay, Inc. <https://liferay.com>
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
-
 /**
  * Public type contracts for the Frontend Data Set (FDS) widget,
  * consumed by Client Extensions. This module re-exports only types. The
@@ -16,12 +15,10 @@
  *
  * - `./connection` — FDS connection and remote state: `FDSConnection`
  *   (and its companion `FDSConnectionConstructor`) let a Client Extension
- *   read and write FDS search and filter state, while `FDSConnectionInfo`,
+ *   read and write FDS search state, while `FDSConnectionInfo`,
  *   `FDSConnectionStatus`, `FDSConnectionOptions`, and
  *   `FDSStateChangeCallback` describe how a connection is opened and
- *   observed. `FDSFilterState` and the `FDSFilterSelectedDataByType` map
- *   describe the filters an FDS declares and the selection payload each
- *   filter type expects.
+ *   observed.
  *
  * - `./cell-renderer` — custom cell renderers: the HTML element builder a
  *   renderer implements to draw a table cell.
@@ -30,39 +27,6 @@
  *   OData query builders for server-side filtering, and description
  *   builders for human-readable filter summaries.
  */
-
-export type {
-	FDSTableCellHTMLElementBuilder,
-	FDSTableCellHTMLElementBuilderArgs,
-} from './cell-renderer';
-
-export {FDSConnection} from './connection';
-
-export type {
-	FDSConnectionConstructor,
-	FDSConnectionInfo,
-	FDSConnectionOptions,
-	FDSConnectionStatus,
-	FDSDateParts,
-	FDSDateRangeFilterSelectedData,
-	FDSFilterDescriptor,
-	FDSFilterSelectedDataByType,
-	FDSFilterSelection,
-	FDSFilterState,
-	FDSFilterType,
-	FDSFilterWriteRejectionReason,
-	FDSFilterWriteResult,
-	FDSSelectionFilterItem,
-	FDSSelectionFilterSelectedData,
-	FDSState,
-	FDSStateChangeCallback,
-} from './connection';
-
-export type {
-	FDSFilter,
-	FDSFilterData,
-	FDSFilterDescriptionBuilder,
-	FDSFilterHTMLElementBuilder,
-	FDSFilterHTMLElementBuilderArgs,
-	FDSFilterODataQueryBuilder,
-} from './filter';
+export type { FDSTableCellHTMLElementBuilder, FDSTableCellHTMLElementBuilderArgs, } from './cell-renderer';
+export type { FDSConnection, FDSConnectionConstructor, FDSConnectionInfo, FDSConnectionOptions, FDSConnectionStatus, FDSState, FDSStateChangeCallback, } from './connection';
+export type { FDSFilter, FDSFilterData, FDSFilterDescriptionBuilder, FDSFilterHTMLElementBuilder, FDSFilterHTMLElementBuilderArgs, FDSFilterODataQueryBuilder, } from './filter';
