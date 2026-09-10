@@ -22,9 +22,11 @@ point, covering three groups:
 
 -   **FDS connection and remote state** (`./connection`) — `FDSConnection` (and
     its companion `FDSConnectionConstructor`) let a Client Extension read and
-    write FDS search state, while `FDSConnectionInfo`, `FDSConnectionStatus`,
-    `FDSConnectionOptions`, and `FDSStateChangeCallback` describe how a
-    connection is opened and observed.
+    write FDS search state and take the data set's filtering over with
+    `FDSConnectionFilter` expressions, while `FDSConnectionInfo`,
+    `FDSConnectionStatus`, `FDSConnectionOptions`, `FDSConnectionOwnership`,
+    `FDSState`, and `FDSStateChangeCallback` describe how a connection is
+    opened and observed.
 -   **Custom cell renderers** (`./cell-renderer`) — `FDSTableCellHTMLElementBuilder`
     and its args, the HTML element builder a renderer implements to draw a table
     cell.
@@ -68,6 +70,51 @@ const connection = new FDSConnection(
 		/* ... */
 	},
 	{timeout: 5000}
+);
+```
+
+#### Taking over the filtering
+
+A connection drives the search and nothing else by default. Declaring
+`owns: ['filters']` takes the data set's filtering over as well: the filters
+it declares stop reaching the request, it drops its filters dropdown and its
+filter chips, and the Client Extension owns the whole expression through
+`setFilters()`.
+
+A data set has one filtering owner and the first connection to ask for it gets
+it, so asking is not getting. A refused connection settles at the `refused`
+status rather than `ready` and drives the search alone, which a Client
+Extension that enables its controls once ready handles without writing any
+code for the case.
+
+Owning the filtering requires an `appId`: whatever the Client Extension asks
+the data set to remember is filed in the page URL under it, and handed back
+through the `restore` callback on the next visit or when the browser's back
+button lands on a different address. Name the `element` too, so that the
+filtering is released if the Client Extension is taken off the page without
+disconnecting.
+
+```ts
+const connection = new FDSConnection(
+	fdsName,
+	{
+		restore: (connectionState) => {
+			// Nothing has validated this: it comes from a URL anyone can edit.
+
+			const selection = parseSelection(connectionState);
+
+			drawFilterUI(selection);
+
+			connection.setFilters(toODataFilters(selection), selection);
+		},
+		search: (query) => {
+			/* ... */
+		},
+	},
+	({status}) => {
+		setControlsEnabled(status === 'ready');
+	},
+	{appId: 'mySampleFilterApp', element, owns: ['filters']}
 );
 ```
 
